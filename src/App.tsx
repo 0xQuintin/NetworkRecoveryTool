@@ -1,18 +1,28 @@
 import { SetStateAction, useRef, useState } from 'react';
 import './App.css';
-import { BigNumberish, ethers, JsonRpcProvider } from 'ethers';
+import { BigNumberish, ethers } from 'ethers';
 import 'core-js/actual';
 import { listen } from "@ledgerhq/logs";
 import Eth from "@ledgerhq/hw-app-eth";
 import TransportWebHID from "@ledgerhq/hw-transport-webhid";
 
-function App() {
+export let [vAddress, setAddress] = useState("not connected yet");
+export let [dp, setDp] = useState("44'/60'/0'/0/0");
+let [derivationInput, setDi] = useState("44'/60'/0'/0/0");
+let [rpcInput, setRpc] = useState("https://api.securerpc.com/v1")
+export let [idInput, setId]: any = useState("1");
 
-  let [vAddress, setAddress] = useState("not connected yet");
-  let [dp, setDp] = useState("44'/60'/0'/0/0");
-  let [derivationInput, setDi] = useState("44'/60'/0'/0/0");
-  let [rpcInput, setRpc] = useState("https://api.securerpc.com/v1")
-  let [idInput, setId] = useState("1");
+let networkName = "";
+export let ledgerAddress: string;
+let recipient;
+let value;
+let gasLimit;
+let gasPrice: any;
+let nonce;
+let ETH;
+export let provider = new ethers.providers.JsonRpcProvider(rpcInput);
+
+function App() {
 
   //I should make the change handlers better, but this is easier for now. lol
   const dChangeHandler = (e: { target: { value: SetStateAction<string>; }; }) => {
@@ -25,17 +35,6 @@ function App() {
     setId(e.target.value);
   }
 
-  let networkName = "";
-  let ledgerAddress;
-  let recipient;
-  let value;
-  let gasLimit;
-  let gasPrice: any;
-  let nonce;
-  let ETH;
-
-  let provider = new JsonRpcProvider(rpcInput);
-
   const connectLedger = async () => {
 
     setDp(dp = derivationInput);
@@ -47,10 +46,6 @@ function App() {
 
     ledgerAddress = address;
     setAddress(vAddress = ledgerAddress);
-    let getFeeData = provider.getFeeData().then(data => {
-      gasPrice = data.gasPrice 
-    })
-    gasPrice = parseInt(gasPrice,16)*1.15;
   }
 
   return (
